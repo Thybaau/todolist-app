@@ -12,3 +12,8 @@ After that, do
 ```shell
 docker run --name postgres-test -p 5432:5432 -d [image_name]
 ```
+
+If you want to enter in your container :
+```shell
+docker exec -it [container_id] bash
+```
