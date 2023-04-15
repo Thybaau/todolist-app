@@ -1,0 +1,15 @@
+version: '3'
+services:
+  database:
+    build:
+      dockerfile: db/Dockerfile
+    image: todolist-database
+    container_name: todolist-db
+    restart: always
+    volumes:
+      - todolist_db:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+
+volumes:
+  todolist_db:
