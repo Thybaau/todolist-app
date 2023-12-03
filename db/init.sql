@@ -1,6 +1,6 @@
+--Create Tasks table
 CREATE TABLE IF NOT EXISTS tasks(
-    id SERIAL PRIMARY KEY NOT NULL,
-    title VARCHAR(100),
-    content VARCHAR(600),
+    id SERIAL PRIMARY KEY,
+    content TEXT,
     statu BOOLEAN NOT NULL DEFAULT FALSE
 );
