@@ -6,7 +6,6 @@ import (
 
 	"github.com/Thybaau/todolist-app/database"
 	"github.com/Thybaau/todolist-app/router"
-	_ "github.com/lib/pq"
 )
 
 const (
