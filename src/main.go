@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/Thybaau/todolist-app/database"
-	"github.com/Thybaau/todolist-app/router"
+	"github.com/Thybaau/todolist-app/server"
 )
 
 const (
@@ -18,20 +18,20 @@ const (
 
 func main() {
 	log.Printf("Running todo-list app Golang...")
-	r := router.Router()
+	srv := server.NewServer()
 
 	// Database connexion
-	db := &database.DBStore{}
-	err := db.Connect(host, port, user, password, dbname)
+	srv.DB = database.DBStore{}
+	err := srv.DB.Connect(host, port, user, password, dbname)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer db.Close()
+	defer srv.DB.Close()
 
 	// Server connexion
 	// http.HandleFunc("/", srv.serveHTTP)
 	log.Printf("Serving HTTP on port 9000")
-	err = http.ListenAndServe(":9000", r)
+	err = http.ListenAndServe(":9000", srv.Router)
 	if err != nil {
 		log.Fatal(err)
 	}
