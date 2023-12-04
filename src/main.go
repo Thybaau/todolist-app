@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/Thybaau/todolist-app/database"
-	"github.com/Thybaau/todolist-app/server"
+	"github.com/Thybaau/todolist-app/router"
 )
 
 const (
@@ -18,7 +18,7 @@ const (
 
 func main() {
 	log.Printf("Running todo-list app Golang...")
-	srv := server.NewServer()
+	srv := router.NewServer()
 
 	// Database connexion
 	srv.DB = database.DBStore{}
