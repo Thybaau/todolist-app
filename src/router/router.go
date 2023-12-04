@@ -1,9 +1,6 @@
 package router
 
-import "github.com/gorilla/mux"
-
-func (s *server) router() *mux.Router {
-	router := mux.NewRouter()
-	router.HandleFunc("/", handleIndex()).Methods("GET")
-	return router
+func (s *server) router() {
+	s.Router.HandleFunc("/", s.handleIndex()).Methods("GET")
+	s.Router.HandleFunc("/tasks/create/", s.handleTaskCreate()).Methods("POST")
 }
