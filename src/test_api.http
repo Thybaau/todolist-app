@@ -2,3 +2,12 @@
 
 #Page d''accueil
 GET {{base_url}}
+
+###
+#Créer une tâche
+POST {{base_url}}/tasks/create/
+Content-Type: application/json
+
+{
+    "content": "Finir Warframe"
+}
