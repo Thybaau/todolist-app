@@ -28,6 +28,7 @@ func (s *server) handleTaskCreate() http.HandlerFunc {
 
 		// Insert task in database
 		t := &database.Task{
+			ID:      0, //Useless because we will not use this element
 			Content: req.Content,
 			State:   false,
 		}
@@ -50,4 +51,29 @@ func (s *server) handleTaskCreate() http.HandlerFunc {
 			log.Printf("Cannot format json, err =%v\n", err)
 		}
 	}
+}
+
+func (s *server) handleTaskList() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		tasks, err := s.DB.GetTaskList()
+		if err != nil {
+			log.Printf("Cannot load tasks, err =%v\n", err)
+			http.Error(w, "Cannot load tasks", http.StatusBadRequest)
+		}
+		var resp = make([]jsonTask, len(tasks))
+		for i, t := range tasks {
+			resp[i] = jsonTask{
+				ID:      t.ID,
+				Content: t.Content,
+				State:   t.State,
+			}
+		}
+		// Write response
+		w.Header().Set("Content-Type", "application/json")
+		err = json.NewEncoder(w).Encode(resp)
+		if err != nil {
+			log.Printf("Cannot format json, err =%v\n", err)
+		}
+	}
+
 }

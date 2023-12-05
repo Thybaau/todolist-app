@@ -9,5 +9,9 @@ POST {{base_url}}/tasks/create/
 Content-Type: application/json
 
 {
-    "content": "Finir Warframe"
+    "content": "Tatakae"
 }
+
+###
+#Liste des tâches
+GET {{base_url}}/tasks/list/
