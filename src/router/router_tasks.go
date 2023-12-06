@@ -4,8 +4,10 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/Thybaau/todolist-app/database"
+	"github.com/gorilla/mux"
 )
 
 type jsonTask struct {
@@ -74,6 +76,25 @@ func (s *server) handleTaskList() http.HandlerFunc {
 		if err != nil {
 			log.Printf("Cannot format json, err =%v\n", err)
 		}
+	}
+
+}
+func (s *server) handleTaskDelete() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Extraire l'ID de la requête
+		vars := mux.Vars(r)
+		taskID, err := strconv.Atoi(vars["id"])
+		if err != nil {
+			http.Error(w, "ID de tâche invalide", http.StatusBadRequest)
+		}
+		//Delete Task
+		err = s.DB.DeleteTask(taskID)
+		if err != nil {
+			log.Printf("Cannot delete task, err =%v\n", err)
+			http.Error(w, "Cannot delete task", http.StatusBadRequest)
+		}
+		// Write response
+		w.WriteHeader(http.StatusNoContent)
 	}
 
 }

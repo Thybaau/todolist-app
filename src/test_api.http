@@ -15,3 +15,7 @@ Content-Type: application/json
 ###
 #Liste des tâches
 GET {{base_url}}/tasks/list/
+
+###
+#Supprimer une tâche
+DELETE  {{base_url}}/tasks/3

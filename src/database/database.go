@@ -69,3 +69,9 @@ func (store *DBStore) CreateTask(t *Task) (int64, error) {
 	err := store.db.QueryRow("INSERT INTO tasks (content,state) VALUES ($1, $2) RETURNING id", t.Content, t.State).Scan(&id)
 	return id, err
 }
+
+func (store *DBStore) DeleteTask(taskID int) error {
+	// Exécuter la requête DELETE
+	_, err := store.db.Exec("DELETE FROM tasks WHERE id = $1", taskID)
+	return err
+}
