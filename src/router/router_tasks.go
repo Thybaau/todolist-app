@@ -77,11 +77,11 @@ func (s *server) handleTaskList() http.HandlerFunc {
 			log.Printf("Cannot format json, err =%v\n", err)
 		}
 	}
-
 }
+
 func (s *server) handleTaskDelete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// Extraire l'ID de la requête
+		// Extract request ID
 		vars := mux.Vars(r)
 		taskID, err := strconv.Atoi(vars["id"])
 		if err != nil {
@@ -95,6 +95,54 @@ func (s *server) handleTaskDelete() http.HandlerFunc {
 		}
 		// Write response
 		w.WriteHeader(http.StatusNoContent)
+	}
+
+}
+
+func (s *server) handleTaskEdit() http.HandlerFunc {
+	type request struct {
+		Content string `json:"content"`
+	}
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		// Decode RequestBody
+		req := request{}
+		err := json.NewDecoder(r.Body).Decode(&req)
+		if err != nil {
+			log.Printf("Cannot parse task body. err=%v\n", err)
+			http.Error(w, "Cannot parse task body from json", http.StatusBadRequest)
+			return
+		}
+		//Valide fields in the request
+		if req.Content == "" {
+			http.Error(w, "Content cannot be empty", http.StatusBadRequest)
+			return
+		}
+
+		// Extraire l'ID de la requête
+		vars := mux.Vars(r)
+		taskID, err := strconv.Atoi(vars["id"])
+		if err != nil {
+			log.Printf("Invalid ID. err=%v\n", err)
+			http.Error(w, "Invalid ID", http.StatusBadRequest)
+			return
+		}
+
+		err = s.DB.EditTask(taskID, req.Content)
+		if err != nil {
+			log.Printf("Cannot modify task, err =%v\n", err)
+			http.Error(w, "Cannot modify task", http.StatusBadRequest)
+			return
+		}
+
+		// Write response
+		// var resp = jsonTask{
+		// 	ID:      id,
+		// 	Content: t.Content,
+		// 	State:   t.State,
+		// }
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
 	}
 
 }

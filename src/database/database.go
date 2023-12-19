@@ -19,6 +19,15 @@ type Task struct {
 	State   bool   `db:"state"`
 }
 
+type CustomError struct {
+	Message string
+}
+
+// Implémentation de l'interface error pour CustomError
+func (e *CustomError) Error() string {
+	return fmt.Sprintf("Error : %s", e.Message)
+}
+
 func (store *DBStore) Connect(host string, port int, user, password, dbname string) error {
 	connStr := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
 	db, err := sql.Open("postgres", connStr)
@@ -73,5 +82,25 @@ func (store *DBStore) CreateTask(t *Task) (int64, error) {
 func (store *DBStore) DeleteTask(taskID int) error {
 	// Exécuter la requête DELETE
 	_, err := store.db.Exec("DELETE FROM tasks WHERE id = $1", taskID)
+	return err
+}
+
+func (store *DBStore) EditTask(taskID int, content string) error {
+	// Check if the row with the specified ID exists
+	var exists bool
+	err := store.db.QueryRow("SELECT EXISTS (SELECT 1 FROM tasks WHERE id = $1)", taskID).Scan(&exists)
+	if err != nil {
+		log.Printf("Failed to check if row exists. err=%v\n", err)
+		return err
+	}
+	if !exists {
+		// ID not found, return a custom error
+		err = &CustomError{
+			Message: fmt.Sprintf("Row with ID %d not found", taskID),
+		}
+		log.Printf("Row with ID %v does not exist", taskID)
+		return err
+	}
+	_, err = store.db.Exec("UPDATE tasks SET content = $1 WHERE id = $2", content, taskID)
 	return err
 }

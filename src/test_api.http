@@ -9,7 +9,7 @@ POST {{base_url}}/tasks/create/
 Content-Type: application/json
 
 {
-    "content": "Tatakae"
+    "content": "mama"
 }
 
 ###
@@ -19,3 +19,12 @@ GET {{base_url}}/tasks/list/
 ###
 #Supprimer une tâche
 DELETE  {{base_url}}/tasks/3
+
+###
+#Modifier une tâche
+PUT {{base_url}}/tasks/41
+Content-Type: application/json
+
+{
+    "content": "bonjour"
+}
