@@ -72,6 +72,19 @@ func (store *DBStore) GetTaskList() ([]*Task, error) {
 	return tasks, nil
 
 }
+func (store *DBStore) GetTask(id int) (*Task, error) {
+	row := store.db.QueryRow("SELECT id, content, state FROM tasks WHERE id = $1", id)
+
+	var task Task
+	if err := row.Scan(&task.ID, &task.Content, &task.State); err != nil {
+		return nil, err
+	}
+	if err := row.Err(); err != nil {
+		return nil, err
+	}
+
+	return &task, nil
+}
 
 func (store *DBStore) CreateTask(t *Task) (int64, error) {
 	var id int64
