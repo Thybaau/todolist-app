@@ -21,10 +21,10 @@ GET {{base_url}}/tasks/list/
 DELETE  {{base_url}}/tasks/3
 
 ###
-#Modifier une tâche
+#Modifier le contenu d'une tâche
 PUT {{base_url}}/tasks/41
 Content-Type: application/json
 
 {
-    "content": "bonjour"
+    "content": "yes"
 }

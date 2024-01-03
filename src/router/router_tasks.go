@@ -104,13 +104,12 @@ func (s *server) handleTaskEdit() http.HandlerFunc {
 		Content string `json:"content"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-
 		// Decode RequestBody
 		req := request{}
 		err := json.NewDecoder(r.Body).Decode(&req)
 		if err != nil {
 			log.Printf("Cannot parse task body. err=%v\n", err)
-			http.Error(w, "Cannot parse task body from json", http.StatusBadRequest)
+			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 		//Valide fields in the request
@@ -124,25 +123,33 @@ func (s *server) handleTaskEdit() http.HandlerFunc {
 		taskID, err := strconv.Atoi(vars["id"])
 		if err != nil {
 			log.Printf("Invalid ID. err=%v\n", err)
-			http.Error(w, "Invalid ID", http.StatusBadRequest)
+			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
 		err = s.DB.EditTask(taskID, req.Content)
 		if err != nil {
-			log.Printf("Cannot modify task, err =%v\n", err)
-			http.Error(w, "Cannot modify task", http.StatusBadRequest)
+			log.Printf("Cannot modify task, err = %v\n", err)
+			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
 		// Write response
-		// var resp = jsonTask{
-		// 	ID:      id,
-		// 	Content: t.Content,
-		// 	State:   t.State,
-		// }
 		w.Header().Set("Content-Type", "application/json")
+		task, err := s.DB.GetTask(taskID)
+		if err != nil {
+			log.Printf("Cannot get task informations with id=%v, err = %v\n", taskID, err)
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		var resp = jsonTask{
+			ID:      task.ID,
+			Content: task.Content,
+			State:   task.State,
+		}
 		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(resp)
 	}
 
 }
