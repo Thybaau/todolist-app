@@ -1,0 +1,34 @@
+@base_url = http://localhost:9000
+
+#Page d''accueil
+GET {{base_url}}
+
+###
+#Créer une tâche
+POST {{base_url}}/tasks/create/
+Content-Type: application/json
+
+{
+    "content": "mama"
+}
+
+###
+#Liste des tâches
+GET {{base_url}}/tasks/list/
+
+###
+#Avoir une certaine tâche
+GET {{base_url}}/tasks/list/?id=5
+
+###
+#Supprimer une tâche
+DELETE  {{base_url}}/tasks/3
+
+###
+#Modifier le contenu d'une tâche
+PUT {{base_url}}/tasks/41
+Content-Type: application/json
+
+{
+    "content": "yes"
+}
