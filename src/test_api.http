@@ -17,6 +17,10 @@ Content-Type: application/json
 GET {{base_url}}/tasks/list/
 
 ###
+#Avoir une certaine tâche
+GET {{base_url}}/tasks/list/?id=5
+
+###
 #Supprimer une tâche
 DELETE  {{base_url}}/tasks/3
 

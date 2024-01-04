@@ -57,17 +57,45 @@ func (s *server) handleTaskCreate() http.HandlerFunc {
 
 func (s *server) handleTaskList() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		tasks, err := s.DB.GetTaskList()
-		if err != nil {
-			log.Printf("Cannot load tasks, err =%v\n", err)
-			http.Error(w, "Cannot load tasks", http.StatusBadRequest)
-		}
-		var resp = make([]jsonTask, len(tasks))
-		for i, t := range tasks {
-			resp[i] = jsonTask{
-				ID:      t.ID,
-				Content: t.Content,
-				State:   t.State,
+		var err error
+		var resp interface{}
+
+		queryParams := r.URL.Query()
+		// If we did not put any query parameter, we get all the task list
+		if len(queryParams) == 0 {
+			tasks, err := s.DB.GetTaskList()
+			if err != nil {
+				log.Printf("Cannot load tasks, err =%v\n", err)
+				http.Error(w, "Cannot load tasks", http.StatusBadRequest)
+			}
+			resp = make([]jsonTask, len(tasks))
+			for i, t := range tasks {
+				// resp[i] = jsonTask{
+				resp.([]jsonTask)[i] = jsonTask{
+					ID:      t.ID,
+					Content: t.Content,
+					State:   t.State,
+				}
+			}
+			// If we put query parameter 'id', we get task with this id
+		} else {
+			taskID := queryParams.Get("id")
+			if taskID == "" {
+				log.Printf("No query parameter 'id' found")
+				http.Error(w, "No query parameter 'id' found", http.StatusBadRequest)
+				return
+			}
+			ID, _ := strconv.Atoi(taskID)
+			task, err := s.DB.GetTask(ID)
+			if err != nil {
+				log.Printf("Cannot get task informations with id=%v, err = %v\n", taskID, err)
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+			resp = jsonTask{
+				ID:      task.ID,
+				Content: task.Content,
+				State:   task.State,
 			}
 		}
 		// Write response
@@ -126,7 +154,6 @@ func (s *server) handleTaskEdit() http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-
 		err = s.DB.EditTask(taskID, req.Content)
 		if err != nil {
 			log.Printf("Cannot modify task, err = %v\n", err)
@@ -142,7 +169,6 @@ func (s *server) handleTaskEdit() http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-
 		var resp = jsonTask{
 			ID:      task.ID,
 			Content: task.Content,
