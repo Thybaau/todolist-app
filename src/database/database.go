@@ -93,9 +93,22 @@ func (store *DBStore) CreateTask(t *Task) (int64, error) {
 }
 
 func (store *DBStore) DeleteTask(taskID int) error {
-	// Exécuter la requête DELETE
-	_, err := store.db.Exec("DELETE FROM tasks WHERE id = $1", taskID)
-	return err
+	result, err := store.db.Exec("DELETE FROM tasks WHERE id = $1", taskID)
+	if err != nil {
+		return err
+	}
+
+	//Check number of lines affected
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	// If no lines affected, it means ID didn't exist
+	if rowsAffected == 0 {
+		return fmt.Errorf("task with ID %d does not exist", taskID)
+	}
+	return nil
 }
 
 func (store *DBStore) EditTask(taskID int, content string) error {

@@ -113,16 +113,19 @@ func (s *server) handleTaskDelete() http.HandlerFunc {
 		vars := mux.Vars(r)
 		taskID, err := strconv.Atoi(vars["id"])
 		if err != nil {
-			http.Error(w, "ID de tâche invalide", http.StatusBadRequest)
+			log.Printf("Cannot convert task ID to int, err = %v\n", err)
+			http.Error(w, "Invalid task ID", http.StatusBadRequest)
+			return
 		}
 		//Delete Task
 		err = s.DB.DeleteTask(taskID)
 		if err != nil {
-			log.Printf("Cannot delete task, err =%v\n", err)
-			http.Error(w, "Cannot delete task", http.StatusBadRequest)
+			log.Printf("Cannot delete task, err = %v\n", err)
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
 		}
 		// Write response
-		w.WriteHeader(http.StatusNoContent)
+		w.WriteHeader(http.StatusAccepted)
 	}
 
 }
