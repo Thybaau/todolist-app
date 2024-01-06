@@ -12,6 +12,9 @@ type HTTPError struct {
 }
 
 func NewHTTPError(w http.ResponseWriter, message string, status int, err error) {
+	logMessage := message + ". err = " + err.Error() + "\n"
+	log.Print(logMessage)
+
 	resp := HTTPError{
 		Error:  message,
 		Detail: err.Error(),
