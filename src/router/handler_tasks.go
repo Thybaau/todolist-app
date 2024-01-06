@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/Thybaau/todolist-app/database"
+	"github.com/Thybaau/todolist-app/middleware"
 	"github.com/gorilla/mux"
 )
 
@@ -115,27 +116,22 @@ func (s *server) handleTaskDelete() http.HandlerFunc {
 		taskID, err := strconv.Atoi(vars["id"])
 		if err != nil {
 			log.Printf("Cannot convert task ID to int, err = %v\n", err)
-			http.Error(w, "Invalid task ID", http.StatusBadRequest)
+			middleware.NewHTTPError(w, "Invalid task ID", http.StatusBadRequest, err)
 			return
 		}
+
 		//Delete Task
 		err = s.DB.DeleteTask(taskID)
 		if err != nil {
 			log.Printf("Cannot delete task, err = %v\n", err)
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			middleware.NewHTTPError(w, "Cannot delete task", http.StatusBadRequest, err)
 			return
 		}
+
 		// Write response
 		successMessage := fmt.Sprintf("successfully deleted task with id=%v", taskID)
-		jsonResp, err := json.Marshal(map[string]string{"message": successMessage})
-		// err = json.NewEncoder(w).Encode(jsonResp)
-		if err != nil {
-			log.Printf("Cannot format json, err =%v\n", err)
-			http.Error(w, err.Error(), http.StatusBadRequest)
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusAccepted)
-		w.Write(jsonResp)
+		jsonResp := map[string]string{"message": successMessage}
+		middleware.JSONResponse(w, http.StatusOK, jsonResp)
 	}
 
 }
