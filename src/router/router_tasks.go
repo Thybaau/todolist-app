@@ -2,6 +2,7 @@ package router
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -125,7 +126,16 @@ func (s *server) handleTaskDelete() http.HandlerFunc {
 			return
 		}
 		// Write response
+		successMessage := fmt.Sprintf("successfully deleted task with id=%v", taskID)
+		jsonResp, err := json.Marshal(map[string]string{"message": successMessage})
+		// err = json.NewEncoder(w).Encode(jsonResp)
+		if err != nil {
+			log.Printf("Cannot format json, err =%v\n", err)
+			http.Error(w, err.Error(), http.StatusBadRequest)
+		}
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusAccepted)
+		w.Write(jsonResp)
 	}
 
 }
