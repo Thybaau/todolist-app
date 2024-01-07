@@ -3,7 +3,6 @@ package router
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -129,37 +128,33 @@ func (s *server) handleTaskEdit() http.HandlerFunc {
 		req := request{}
 		err := json.NewDecoder(r.Body).Decode(&req)
 		if err != nil {
-			log.Printf("Cannot parse task body. err=%v\n", err)
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			middleware.NewHTTPError(w, "Cannot parse task body", http.StatusBadRequest, err)
 			return
 		}
 		//Valide fields in the request
 		if req.Content == "" {
-			http.Error(w, "Content cannot be empty", http.StatusBadRequest)
+			middleware.NewHTTPError(w, "Key 'content' cannot be empty", http.StatusForbidden, nil)
 			return
 		}
 
-		// Extraire l'ID de la requête
+		// Extract ID from path parameter
 		vars := mux.Vars(r)
 		taskID, err := strconv.Atoi(vars["id"])
 		if err != nil {
-			log.Printf("Invalid ID. err=%v\n", err)
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			middleware.NewHTTPError(w, "Invalid ID", http.StatusBadRequest, err)
 			return
 		}
 		err = s.DB.EditTask(taskID, req.Content)
 		if err != nil {
-			log.Printf("Cannot modify task, err = %v\n", err)
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			middleware.NewHTTPError(w, "Cannot edit task", http.StatusBadRequest, err)
 			return
 		}
 
 		// Write response
-		w.Header().Set("Content-Type", "application/json")
 		task, err := s.DB.GetTask(taskID)
 		if err != nil {
-			log.Printf("Cannot get task informations with id=%v, err = %v\n", taskID, err)
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			message := fmt.Sprintf("Cannot get task informations for id=%v", taskID)
+			middleware.NewHTTPError(w, message, http.StatusBadRequest, err)
 			return
 		}
 		var resp = jsonTask{
@@ -167,8 +162,6 @@ func (s *server) handleTaskEdit() http.HandlerFunc {
 			Content: task.Content,
 			State:   task.State,
 		}
-		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(resp)
+		middleware.JSONResponse(w, http.StatusOK, resp)
 	}
-
 }
