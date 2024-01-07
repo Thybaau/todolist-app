@@ -79,9 +79,6 @@ func (store *DBStore) GetTask(id int) (*Task, error) {
 	if err := row.Scan(&task.ID, &task.Content, &task.State); err != nil {
 		return nil, err
 	}
-	if err := row.Err(); err != nil {
-		return nil, err
-	}
 
 	return &task, nil
 }
