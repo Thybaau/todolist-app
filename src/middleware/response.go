@@ -12,12 +12,22 @@ type HTTPError struct {
 }
 
 func NewHTTPError(w http.ResponseWriter, message string, status int, err error) {
-	logMessage := message + ". err = " + err.Error() + "\n"
-	log.Print(logMessage)
+	var resp HTTPError
+	switch err {
+	case nil:
+		logMessage := message + "\n"
+		log.Print(logMessage)
+		resp = HTTPError{
+			Error: message,
+		}
+	default:
+		logMessage := message + ". err = " + err.Error() + "\n"
+		log.Print(logMessage)
 
-	resp := HTTPError{
-		Error:  message,
-		Detail: err.Error(),
+		resp = HTTPError{
+			Error:  message,
+			Detail: err.Error(),
+		}
 	}
 	JSONResponse(w, status, resp)
 }
