@@ -26,8 +26,8 @@ func (s *server) handleTaskCreate() http.HandlerFunc {
 		req := request{}
 		err := json.NewDecoder(r.Body).Decode(&req)
 		if err != nil {
-			log.Printf("Cannot parse task body. err=%v\n", err)
-			http.Error(w, "Cannot parse task body from json", http.StatusBadRequest)
+			middleware.NewHTTPError(w, "Cannot decode task body from json", http.StatusBadRequest, err)
+			return
 		}
 
 		// Insert task in database
@@ -38,8 +38,8 @@ func (s *server) handleTaskCreate() http.HandlerFunc {
 		}
 		id, err := s.DB.CreateTask(t)
 		if err != nil {
-			log.Printf("Cannot create task in database. err=%v\n", err)
-			http.Error(w, "Cannot create task in database", http.StatusBadRequest)
+			middleware.NewHTTPError(w, "Cannot create task in database", http.StatusBadRequest, err)
+			return
 		}
 
 		// Write response
@@ -48,12 +48,7 @@ func (s *server) handleTaskCreate() http.HandlerFunc {
 			Content: t.Content,
 			State:   t.State,
 		}
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusAccepted)
-		err = json.NewEncoder(w).Encode(resp)
-		if err != nil {
-			log.Printf("Cannot format json, err =%v\n", err)
-		}
+		middleware.JSONResponse(w, http.StatusOK, resp)
 	}
 }
 
