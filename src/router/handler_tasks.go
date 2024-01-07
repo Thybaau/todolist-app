@@ -115,7 +115,6 @@ func (s *server) handleTaskDelete() http.HandlerFunc {
 		vars := mux.Vars(r)
 		taskID, err := strconv.Atoi(vars["id"])
 		if err != nil {
-			log.Printf("Cannot convert task ID to int, err = %v\n", err)
 			middleware.NewHTTPError(w, "Invalid task ID", http.StatusBadRequest, err)
 			return
 		}
@@ -123,7 +122,6 @@ func (s *server) handleTaskDelete() http.HandlerFunc {
 		//Delete Task
 		err = s.DB.DeleteTask(taskID)
 		if err != nil {
-			log.Printf("Cannot delete task, err = %v\n", err)
 			middleware.NewHTTPError(w, "Cannot delete task", http.StatusBadRequest, err)
 			return
 		}
@@ -133,7 +131,6 @@ func (s *server) handleTaskDelete() http.HandlerFunc {
 		jsonResp := map[string]string{"message": successMessage}
 		middleware.JSONResponse(w, http.StatusOK, jsonResp)
 	}
-
 }
 
 func (s *server) handleTaskEdit() http.HandlerFunc {
