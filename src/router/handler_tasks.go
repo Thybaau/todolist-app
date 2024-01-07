@@ -22,10 +22,15 @@ func (s *server) handleTaskCreate() http.HandlerFunc {
 		Content string `json:"content"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
+		//Decode and check fields in request
 		req := request{}
 		err := json.NewDecoder(r.Body).Decode(&req)
 		if err != nil {
 			middleware.NewHTTPError(w, "Cannot decode task body from json", http.StatusBadRequest, err)
+			return
+		}
+		if req.Content == "" {
+			middleware.NewHTTPError(w, "Key 'content' cannot be empty", http.StatusForbidden, nil)
 			return
 		}
 
