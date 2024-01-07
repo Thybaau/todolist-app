@@ -54,20 +54,17 @@ func (s *server) handleTaskCreate() http.HandlerFunc {
 
 func (s *server) handleTaskList() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var err error
 		var resp interface{}
-
 		queryParams := r.URL.Query()
+
 		// If we did not put any query parameter, we get all the task list
 		if len(queryParams) == 0 {
 			tasks, err := s.DB.GetTaskList()
 			if err != nil {
-				log.Printf("Cannot load tasks, err =%v\n", err)
-				http.Error(w, "Cannot load tasks", http.StatusBadRequest)
+				middleware.NewHTTPError(w, "Cannot load tasks", http.StatusInternalServerError, err)
 			}
 			resp = make([]jsonTask, len(tasks))
 			for i, t := range tasks {
-				// resp[i] = jsonTask{
 				resp.([]jsonTask)[i] = jsonTask{
 					ID:      t.ID,
 					Content: t.Content,
@@ -78,15 +75,14 @@ func (s *server) handleTaskList() http.HandlerFunc {
 		} else {
 			taskID := queryParams.Get("id")
 			if taskID == "" {
-				log.Printf("No query parameter 'id' found")
-				http.Error(w, "No query parameter 'id' found", http.StatusBadRequest)
+				middleware.NewHTTPError(w, "Query parameter 'id' not found", http.StatusNotFound, nil)
 				return
 			}
 			ID, _ := strconv.Atoi(taskID)
 			task, err := s.DB.GetTask(ID)
 			if err != nil {
-				log.Printf("Cannot get task informations with id=%v, err = %v\n", taskID, err)
-				http.Error(w, err.Error(), http.StatusBadRequest)
+				message := fmt.Sprintf("Task id=%v not found", taskID)
+				middleware.NewHTTPError(w, message, http.StatusNotFound, err)
 				return
 			}
 			resp = jsonTask{
@@ -96,11 +92,7 @@ func (s *server) handleTaskList() http.HandlerFunc {
 			}
 		}
 		// Write response
-		w.Header().Set("Content-Type", "application/json")
-		err = json.NewEncoder(w).Encode(resp)
-		if err != nil {
-			log.Printf("Cannot format json, err =%v\n", err)
-		}
+		middleware.JSONResponse(w, http.StatusOK, resp)
 	}
 }
 
