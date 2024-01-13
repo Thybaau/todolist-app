@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/Thybaau/todolist-app/database"
+	"github.com/Thybaau/todolist-app/middleware"
 	"github.com/Thybaau/todolist-app/router"
 )
 
@@ -30,6 +31,7 @@ func main() {
 
 	// Server connexion
 	// http.HandleFunc("/", srv.serveHTTP)
+	srv.Router.Use(middleware.LogRequests)
 	log.Printf("Serving HTTP on port 9000")
 	err = http.ListenAndServe(":9000", srv.Router)
 	if err != nil {

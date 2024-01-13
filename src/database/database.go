@@ -79,9 +79,6 @@ func (store *DBStore) GetTask(id int) (*Task, error) {
 	if err := row.Scan(&task.ID, &task.Content, &task.State); err != nil {
 		return nil, err
 	}
-	if err := row.Err(); err != nil {
-		return nil, err
-	}
 
 	return &task, nil
 }
@@ -93,9 +90,22 @@ func (store *DBStore) CreateTask(t *Task) (int64, error) {
 }
 
 func (store *DBStore) DeleteTask(taskID int) error {
-	// Exécuter la requête DELETE
-	_, err := store.db.Exec("DELETE FROM tasks WHERE id = $1", taskID)
-	return err
+	result, err := store.db.Exec("DELETE FROM tasks WHERE id = $1", taskID)
+	if err != nil {
+		return err
+	}
+
+	//Check number of lines affected
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	// If no lines affected, it means ID didn't exist
+	if rowsAffected == 0 {
+		return fmt.Errorf("task with ID %d does not exist", taskID)
+	}
+	return nil
 }
 
 func (store *DBStore) EditTask(taskID int, content string) error {
@@ -103,17 +113,29 @@ func (store *DBStore) EditTask(taskID int, content string) error {
 	var exists bool
 	err := store.db.QueryRow("SELECT EXISTS (SELECT 1 FROM tasks WHERE id = $1)", taskID).Scan(&exists)
 	if err != nil {
-		log.Printf("Failed to check if row exists. err=%v\n", err)
 		return err
 	}
 	if !exists {
 		// ID not found, return a custom error
 		err = &CustomError{
-			Message: fmt.Sprintf("Row with ID %d not found", taskID),
+			Message: fmt.Sprintf("row with ID %d not found", taskID),
 		}
-		log.Printf("Row with ID %v does not exist", taskID)
 		return err
 	}
 	_, err = store.db.Exec("UPDATE tasks SET content = $1 WHERE id = $2", content, taskID)
 	return err
+}
+
+func (store *DBStore) ChangeTaskState(taskID int) (*Task, error) {
+	task, err := store.GetTask(taskID)
+	if err != nil {
+		return nil, err
+	}
+	newState := !task.State
+	_, err = store.db.Exec("UPDATE tasks SET state = $1 WHERE id = $2", newState, taskID)
+	if err != nil {
+		return nil, err
+	}
+	task, err = store.GetTask(taskID)
+	return task, err
 }
