@@ -1,6 +1,7 @@
 package router
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -168,5 +169,37 @@ func (s *server) handleTaskEdit() http.HandlerFunc {
 			State:   task.State,
 		}
 		middleware.JSONResponse(w, http.StatusOK, resp)
+	}
+}
+
+func (s *server) handleTaskState() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Extract request ID
+		vars := mux.Vars(r)
+		taskID, err := strconv.Atoi(vars["id"])
+		if err != nil {
+			middleware.NewHTTPError(w, "Invalid task ID", http.StatusBadRequest, err)
+			return
+		}
+
+		task, err := s.DB.ChangeTaskState(taskID)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				middleware.NewHTTPError(w, "Task not found", http.StatusNotFound, err)
+				return
+			} else {
+				middleware.NewHTTPError(w, "Cannot change task state", http.StatusBadRequest, err)
+				return
+			}
+		}
+
+		// Write response
+		var resp = jsonTask{
+			ID:      task.ID,
+			Content: task.Content,
+			State:   task.State,
+		}
+		middleware.JSONResponse(w, http.StatusOK, resp)
+
 	}
 }

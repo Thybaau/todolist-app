@@ -125,3 +125,17 @@ func (store *DBStore) EditTask(taskID int, content string) error {
 	_, err = store.db.Exec("UPDATE tasks SET content = $1 WHERE id = $2", content, taskID)
 	return err
 }
+
+func (store *DBStore) ChangeTaskState(taskID int) (*Task, error) {
+	task, err := store.GetTask(taskID)
+	if err != nil {
+		return nil, err
+	}
+	newState := !task.State
+	_, err = store.db.Exec("UPDATE tasks SET state = $1 WHERE id = $2", newState, taskID)
+	if err != nil {
+		return nil, err
+	}
+	task, err = store.GetTask(taskID)
+	return task, err
+}
