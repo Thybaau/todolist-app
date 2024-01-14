@@ -5,7 +5,7 @@ GET {{base_url}}
 
 ###
 #Créer une tâche
-POST {{base_url}}/tasks/create/
+POST {{base_url}}/tasks
 Content-Type: application/json
 
 {
@@ -14,21 +14,24 @@ Content-Type: application/json
 
 ###
 #Liste des tâches
-GET {{base_url}}/tasks/list/
+GET {{base_url}}/tasks
 
 ###
 #Avoir une certaine tâche
-GET {{base_url}}/tasks/list/?id=5
+GET {{base_url}}/tasks?id=5
 
 ###
 #Supprimer une tâche
-DELETE  {{base_url}}/tasks/3
+DELETE  {{base_url}}/tasks/9
 
 ###
 #Modifier le contenu d'une tâche
-PUT {{base_url}}/tasks/41
+PUT {{base_url}}/tasks/12
 Content-Type: application/json
 
 {
-    "content": "yes"
+    "Content": "yo"
 }
+
+### Valider/dévalider une tâche
+PUT {{base_url}}/tasks/state/145887
