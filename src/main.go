@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	host     = "localhost"
+	host     = "database"
 	port     = 5432
 	user     = "postgres"
 	password = "123456"
@@ -27,12 +27,13 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	log.Printf("Connected to database")
 	defer srv.DB.Close()
 
 	// Server connexion
 	// http.HandleFunc("/", srv.serveHTTP)
 	srv.Router.Use(middleware.LogRequests)
-	log.Printf("Serving HTTP on port 9000")
+	log.Printf("Running server on port 9000")
 	err = http.ListenAndServe(":9000", srv.Router)
 	if err != nil {
 		log.Fatal(err)
