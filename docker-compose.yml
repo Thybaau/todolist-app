@@ -11,5 +11,16 @@ services:
     ports:
       - 5432:5432
 
+  server:
+    build:
+      dockerfile: src/Dockerfile
+    image: todolist-server
+    container_name: todolist-srv
+    restart: on-failure
+    ports:
+      - 8080:9000
+    depends_on:
+      - database
+
 volumes:
   todolist_db:
