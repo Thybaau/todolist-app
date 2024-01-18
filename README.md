@@ -3,22 +3,12 @@
 To-do list app, using PostgreSQL as database, Golang for back-end part, and ReactJS/Javascript for front-end.
 Everything is packaged with Docker
 
-## RUNNING DATABASE with dockerfile
+## Running app with dockerfile
 
-Go in same repository as dockerfile and write :
-
-```shell
-docker build -t [name_of_your_image] .
-```
-
-After that, do
+In same repository as docker-compose.yml, do :
 
 ```shell
-docker run --name postgres-test -p 5432:5432 -d [image_name]
+docker compose up -d
 ```
 
-If you want to enter in your container :
-
-```shell
-docker exec -it [container_id] bash
-```
+App should now correctly running
