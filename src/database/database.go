@@ -8,6 +8,17 @@ import (
 	_ "github.com/lib/pq"
 )
 
+type Database interface {
+	Connect(host string, port int, user, password, dbname string) error
+	Close() error
+	GetTaskList() ([]*Task, error)
+	GetTask(id int) (*Task, error)
+	CreateTask(t *Task) (int64, error)
+	DeleteTask(taskID int) error
+	EditTask(taskID int, content string) error
+	ChangeTaskState(taskID int) (*Task, error)
+}
+
 type DBStore struct {
 	db *sql.DB
 }
@@ -23,7 +34,6 @@ type CustomError struct {
 	Message string
 }
 
-// Implémentation de l'interface error pour CustomError
 func (e *CustomError) Error() string {
 	return fmt.Sprintf("Error : %s", e.Message)
 }
