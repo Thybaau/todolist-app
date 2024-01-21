@@ -20,7 +20,7 @@ type Database interface {
 }
 
 type DBStore struct {
-	db *sql.DB
+	DB *sql.DB
 }
 
 // Tasks structs
@@ -50,16 +50,16 @@ func (store *DBStore) Connect(host string, port int, user, password, dbname stri
 		return err
 	}
 	log.Printf("Connected to Postgre DB %s", dbname)
-	store.db = db
+	store.DB = db
 	return nil
 }
 
 func (store *DBStore) Close() error {
-	return store.db.Close()
+	return store.DB.Close()
 }
 
 func (store *DBStore) GetTaskList() ([]*Task, error) {
-	rows, err := store.db.Query("SELECT id, content, state FROM tasks")
+	rows, err := store.DB.Query("SELECT id, content, state FROM tasks")
 	if err != nil {
 		return nil, err
 	}
@@ -83,7 +83,7 @@ func (store *DBStore) GetTaskList() ([]*Task, error) {
 
 }
 func (store *DBStore) GetTask(id int) (*Task, error) {
-	row := store.db.QueryRow("SELECT id, content, state FROM tasks WHERE id = $1", id)
+	row := store.DB.QueryRow("SELECT id, content, state FROM tasks WHERE id = $1", id)
 
 	var task Task
 	if err := row.Scan(&task.ID, &task.Content, &task.State); err != nil {
@@ -95,12 +95,12 @@ func (store *DBStore) GetTask(id int) (*Task, error) {
 
 func (store *DBStore) CreateTask(t *Task) (int64, error) {
 	var id int64
-	err := store.db.QueryRow("INSERT INTO tasks (content,state) VALUES ($1, $2) RETURNING id", t.Content, t.State).Scan(&id)
+	err := store.DB.QueryRow("INSERT INTO tasks (content,state) VALUES ($1, $2) RETURNING id", t.Content, t.State).Scan(&id)
 	return id, err
 }
 
 func (store *DBStore) DeleteTask(taskID int) error {
-	result, err := store.db.Exec("DELETE FROM tasks WHERE id = $1", taskID)
+	result, err := store.DB.Exec("DELETE FROM tasks WHERE id = $1", taskID)
 	if err != nil {
 		return err
 	}
@@ -121,7 +121,7 @@ func (store *DBStore) DeleteTask(taskID int) error {
 func (store *DBStore) EditTask(taskID int, content string) error {
 	// Check if the row with the specified ID exists
 	var exists bool
-	err := store.db.QueryRow("SELECT EXISTS (SELECT 1 FROM tasks WHERE id = $1)", taskID).Scan(&exists)
+	err := store.DB.QueryRow("SELECT EXISTS (SELECT 1 FROM tasks WHERE id = $1)", taskID).Scan(&exists)
 	if err != nil {
 		return err
 	}
@@ -132,7 +132,7 @@ func (store *DBStore) EditTask(taskID int, content string) error {
 		}
 		return err
 	}
-	_, err = store.db.Exec("UPDATE tasks SET content = $1 WHERE id = $2", content, taskID)
+	_, err = store.DB.Exec("UPDATE tasks SET content = $1 WHERE id = $2", content, taskID)
 	return err
 }
 
@@ -142,7 +142,7 @@ func (store *DBStore) ChangeTaskState(taskID int) (*Task, error) {
 		return nil, err
 	}
 	newState := !task.State
-	_, err = store.db.Exec("UPDATE tasks SET state = $1 WHERE id = $2", newState, taskID)
+	_, err = store.DB.Exec("UPDATE tasks SET state = $1 WHERE id = $2", newState, taskID)
 	if err != nil {
 		return nil, err
 	}
