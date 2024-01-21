@@ -7,7 +7,7 @@ import (
 
 type server struct {
 	Router *mux.Router
-	DB     database.DBStore
+	DB     database.Database
 }
 
 func NewServer() *server {

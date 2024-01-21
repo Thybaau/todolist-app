@@ -22,7 +22,7 @@ func main() {
 	srv := router.NewServer()
 
 	// Database connexion
-	srv.DB = database.DBStore{}
+	srv.DB = &database.DBStore{}
 	err := srv.DB.Connect(host, port, user, password, dbname)
 	if err != nil {
 		log.Fatal(err)
