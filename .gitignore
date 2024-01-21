@@ -2,4 +2,4 @@
 __debug_bin
 
 #Server
-src/test_api.http
+server/test_api.http
