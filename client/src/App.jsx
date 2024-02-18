@@ -2,7 +2,7 @@ import { useState } from 'react'
 import TaskList from './components/TaskList'
 
 function App() {
-  const [tasks, setTasks] = useState([
+  const [tasks, setTasks] = useState([])
 
   ])
 
@@ -15,7 +15,7 @@ function App() {
           <input type='text' className='mt-1 block w-full rounded'></input>
           <button className='mt-4 py-2 px-2 bg-slate-50 rounded min-w-[115px]'>Add a task</button>
         </form>
-        <TaskList />
+        <TaskList setTasks={setTasks} tasks={tasks}/>
       </div>
     </div>
   )
