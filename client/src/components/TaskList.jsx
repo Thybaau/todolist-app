@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react"
+import DeleteForeverRoundedIcon from '@mui/icons-material/DeleteForeverRounded';
+import ModeEditOutlineRoundedIcon from '@mui/icons-material/ModeEditOutlineRounded';
 
 export default function TaskList({tasks, setTasks}) {
 
@@ -38,9 +40,16 @@ export default function TaskList({tasks, setTasks}) {
             {tasks.length === 0 && (<li className="text-slate-50 text-md"> No task yet</li>)}
             {tasks.length > 0 &&
             tasks.map(task => (
-                <li key={task.id} className="p-2 bg-zinc-200 mb-2 rounded flex">
-                    {task.content}
-                    <button onClick={() => deleteTask(task.id)} className="ml-auto bg-red-600 w-6 h-6 rounded text-zinc-200">X</button>
+                <li key={task.id} className="p-2 bg-zinc-200 mb-2 rounded flex justify-between">
+                    <div>{task.content}</div>
+                    <div className="flex">
+                        <button className="w-6 h-6 rounded text-gray-800 flex items-center justify-center">
+                            <ModeEditOutlineRoundedIcon fontSize="large"/>
+                        </button>
+                        <button onClick={() => deleteTask(task.id)} className="ml-3 w-6 h-6 rounded text-red-800 flex items-center justify-center">
+                            <DeleteForeverRoundedIcon fontSize="large"/>
+                        </button>
+                    </div>
                 </li>
                 ))}
         </ul>
