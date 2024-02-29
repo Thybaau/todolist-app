@@ -91,12 +91,12 @@ export default function TaskList({tasks, setTasks}) {
                         <button className="ml-2 text-gray-800" onClick={() => saveEditTask(task.id)}><CheckCircleIcon fontSize="large"/></button>
                         <button className="ml-2 text-red-800" onClick={() => setEditableTaskId(null)}><CancelIcon fontSize="large"/></button>
                         </div>
-                    ) : <div>{task.content}</div>}
-                    <div className="flex">
+                    ) : <div className="">{task.content}</div>}
+                    <div className="flex mr-5">
                         <button className="w-6 h-6 rounded text-gray-800 flex items-center justify-center" onClick={() => handleEditClick(task.id, task.content)}>
                             <ModeEditOutlineRoundedIcon fontSize="large"/>
                         </button>
-                        <button onClick={() => deleteTask(task.id)} className="ml-3 w-6 h-6 rounded text-red-800 flex items-center justify-center">
+                        <button onClick={() => deleteTask(task.id)} className="ml-7 w-6 h-6 rounded text-red-800 flex items-center justify-center">
                             <DeleteForeverRoundedIcon fontSize="large"/>
                         </button>
                     </div>
