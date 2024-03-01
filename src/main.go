@@ -34,7 +34,7 @@ func main() {
 	// Middleware CORS
 	headers := handlers.AllowedHeaders([]string{"Content-Type", "Authorization"})
 	methods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"})
-	origins := handlers.AllowedOrigins([]string{"http://localhost:5173"})
+	origins := handlers.AllowedOrigins([]string{"http://localhost:3000"})
 
 	// Server connexion
 	// http.HandleFunc("/", srv.serveHTTP)
