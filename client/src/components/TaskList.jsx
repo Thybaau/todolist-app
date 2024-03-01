@@ -76,12 +76,34 @@ export default function TaskList({tasks, setTasks}) {
           handleSaveEdit(id);
         }
     };
+
+    async function changeTaskState(task) {
+        try {
+            const response = await fetch(`http://localhost:8080/tasks/state/${task.id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },})
+            if (response.ok) {
+                fetch('http://localhost:8080/tasks', {
+                    method: 'GET'
+                })
+                    .then(response => response.json())
+                    .then(data => setTasks(data))
+                    .catch(error => console.error('Error while getting tasks', error))};
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
     return (
         <ul>
             {tasks.length === 0 && (<li className="text-slate-50 text-md"> No task yet</li>)}
             {tasks.length > 0 &&
             tasks.map(task => (
-                <li key={task.id} className="p-2 bg-zinc-200 mb-2 rounded flex justify-between">
+                <li key={task.id} className={`p-2 bg-zinc-200 mb-2 rounded flex justify-between ${task.state ? "line-through" : ""}`}>
+                    <input type="checkbox" className="rounded-full h-6 w-6 appearance-none border border-gray-700 checked:bg-gray-400 checked:border-transparent ml-2"
+                    checked={task.state || false} onChange={() => changeTaskState(task)}/>
                     {editableTaskId === task.id ? (
                         <div className="flex">
                         <input className="bg-gray-100 border border-gray-600 text-gray-700 rounded-lg" type="text" value={editedContent}
