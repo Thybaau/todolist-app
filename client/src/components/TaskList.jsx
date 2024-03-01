@@ -16,6 +16,8 @@ export default function TaskList({tasks, setTasks}) {
             .then(data => setTasks(data))
             .catch(error => console.error('Error while getting tasks', error));
     }, [])
+    // Sort tasks by id
+    const sortedTasks = [...tasks].sort((a, b) => a.id - b.id);
 
     function deleteTask(id){
         fetch(`http://localhost:8080/tasks/${id}`, {
@@ -98,9 +100,9 @@ export default function TaskList({tasks, setTasks}) {
 
     return (
         <ul>
-            {tasks.length === 0 && (<li className="text-slate-50 text-md"> No task yet</li>)}
-            {tasks.length > 0 &&
-            tasks.map(task => (
+            {sortedTasks.length === 0 && (<li className="text-slate-50 text-md"> No task yet</li>)}
+            {sortedTasks.length > 0 &&
+            sortedTasks.map(task => (
                 <li key={task.id} className={`p-2 bg-zinc-200 mb-2 rounded flex justify-between ${task.state ? "line-through" : ""}`}>
                     <input type="checkbox" className="rounded-full h-6 w-6 appearance-none border border-gray-700 checked:bg-gray-400 checked:border-transparent ml-2"
                     checked={task.state || false} onChange={() => changeTaskState(task)}/>
