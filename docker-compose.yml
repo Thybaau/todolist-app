@@ -13,7 +13,7 @@ services:
 
   server:
     build:
-      dockerfile: src/Dockerfile
+      dockerfile: server/Dockerfile
     image: todolist-server
     container_name: todolist-srv
     restart: on-failure
