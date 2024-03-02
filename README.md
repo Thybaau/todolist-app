@@ -10,6 +10,7 @@
       <a href="#about-project">About Project</a>
       <ul>
         <li><a href="#built-with">Built With</a></li>
+        <li><a href="#functionalities">Functionalities</a></li>
       </ul>
     </li>
     <li>
@@ -24,6 +25,9 @@
 </details>
 
 ## About Project
+
+![Product Name Screen Shot](imgs/todolist_image.png)
+
 Simple To-do list app, to order your tasks.
 Using PostgreSQL as database, Golang for back-end part, and ReactJS/Javascript for front-end. Each services are containerized with Docker and run with Docker Compose.
 
@@ -34,13 +38,33 @@ Using PostgreSQL as database, Golang for back-end part, and ReactJS/Javascript f
 * [![Postgre][Postgre]][Postgre-url]
 * [![Docker][Docker]][Docker-url]
 
+### Functionalities
+
+* Real time tasks list.
+* Add new task, settings his content.
+* Delete task, by clicking on red button to the right of each tasks.
+* Edit task, by clicking on the pencil button to the right of each tasks.
+* Check/uncheck task with checkbox button. This will validate and cross task.
+
 ## Getting Started
 
 ### Prerequisites
 
-You need to have Docker and Docker Compose installed on your computer to run project services.
+You need to have Docker and Docker Compose installed on your computer to run project services. This can be done here : https://docs.docker.com/get-docker/
 
 ### Installation
+
+1. If not already done, get a public SSH key.
+
+2. Clone the repo via SSH
+  ```sh
+  git clone git@github.com:Thybaau/todolist-app.git
+  ```
+
+3. Or you can clone it via HTTPS
+  ```sh
+  git clone https://github.com/Thybaau/todolist-app.git
+  ```
 
 ## Usage
 
@@ -63,27 +87,14 @@ If you want to enter in one of the containers :
 ```shell
 docker compose exec <service_name> sh
 ```
-### Functionalities
-
-* Real time tasks list.
-* Add new task, settings his content.
-* Delete task, by clicking on red button to the right of each tasks.
-* Edit task, by clicking on the pencil button to the right of each tasks.
-* Check/uncheck task with checkbox button. This will validate and cross task.
 
 <!-- MARKDOWN LINKS & IMAGES -->
-<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/github_username/repo_name.svg?style=for-the-badge
-[contributors-url]: https://github.com/github_username/repo_name/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/github_username/repo_name.svg?style=for-the-badge
-[forks-url]: https://github.com/github_username/repo_name/network/members
-[stars-shield]: https://img.shields.io/github/stars/github_username/repo_name.svg?style=for-the-badge
-[stars-url]: https://github.com/github_username/repo_name/stargazers
+
 [issues-shield]: https://img.shields.io/github/issues/github_username/repo_name.svg?style=for-the-badge
 [issues-url]: https://github.com/github_username/repo_name/issues
+
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/linkedin_username
-[product-screenshot]: images/screenshot.png
 
 [Go]:     https://img.shields.io/badge/Go-00ADD8?style=for-the-badge&logo=go&logoColor=white
 [Go-url]: https://go.dev/
