@@ -1,2 +1,5 @@
 .vscode
 __debug_bin
+
+#Server
+server/test_api.http

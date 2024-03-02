@@ -13,7 +13,7 @@ services:
 
   server:
     build:
-      dockerfile: src/Dockerfile
+      dockerfile: server/Dockerfile
     image: todolist-server
     container_name: todolist-srv
     restart: on-failure
@@ -21,6 +21,17 @@ services:
       - 8080:9000
     depends_on:
       - database
+
+  client:
+    build:
+      dockerfile: client/Dockerfile
+    image : todolist-client
+    container_name: todolist-front
+    restart: on-failure
+    ports:
+      - "3000:5173"
+    depends_on:
+      - server
 
 volumes:
   todolist_db:
