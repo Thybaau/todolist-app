@@ -7,6 +7,7 @@ import (
 	"github.com/Thybaau/todolist-app/database"
 	"github.com/Thybaau/todolist-app/middleware"
 	"github.com/Thybaau/todolist-app/router"
+	"github.com/gorilla/handlers"
 )
 
 const (
@@ -30,11 +31,16 @@ func main() {
 	log.Printf("Connected to database")
 	defer srv.DB.Close()
 
+	// Middleware CORS
+	headers := handlers.AllowedHeaders([]string{"Content-Type", "Authorization"})
+	methods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"})
+	origins := handlers.AllowedOrigins([]string{"http://localhost:3000"})
+
 	// Server connexion
 	// http.HandleFunc("/", srv.serveHTTP)
 	srv.Router.Use(middleware.LogRequests)
 	log.Printf("Running server on port 9000")
-	err = http.ListenAndServe(":9000", srv.Router)
+	err = http.ListenAndServe(":9000", handlers.CORS(headers, methods, origins)(srv.Router))
 	if err != nil {
 		log.Fatal(err)
 	}
