@@ -1,7 +1,7 @@
 # This workflow will build a golang project
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
 
-name: Go
+name: CI/CD
 
 on:
   push:
@@ -10,12 +10,26 @@ on:
     branches: [ "master", "develop" ]
 
 jobs:
-  test_job_1:
-    name: Test Job 1
+  build_and_run_api:
+    name: Build an Run Go API
     runs-on: ubuntu-latest
     steps:
-      - name: Run echo command
-        run: echo "Running Test Job 1"
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version : '1.18'
+
+      - name: Change directory to server
+        run: cd server
+  
+      - name: Build
+        run: go build -v ./...
+      
+      - name: Unit tests
+        run: go test -v ./tests
 
   test_job_2:
     name: Test Job 2
@@ -43,4 +57,5 @@ jobs:
 
     # - name: Test
     #   run: go test -v ./...
-    
+  
+          
