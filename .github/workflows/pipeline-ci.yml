@@ -22,17 +22,17 @@ jobs:
         with:
           go-version : '1.18'
 
-      - name: Change directory to server
-        run: cd server
+      # - name: Change directory to server
+      #   run: cd server
   
       # - name: Install dependencies
       #   run: go mod download
       
       - name: Unit tests
-        run: go test ./tests/... -v
+        run: go test ./server/tests/... -v
   
       - name: Build
-        run: go run main.go &
+        run: go run ./server/main.go &
 
   test_job_2:
     name: Test Job 2
