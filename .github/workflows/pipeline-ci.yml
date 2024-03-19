@@ -16,16 +16,16 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-        
-      - name: Change directory to server
-        run: cd server
 
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
           go-version : '1.18'
+
+      - name: Change directory to server
+        run: cd server
   
-      - name: Download dependencies
+      - name: Install dependencies
         run: go mod download
       
       - name: Unit tests
