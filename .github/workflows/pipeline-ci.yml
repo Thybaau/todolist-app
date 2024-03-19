@@ -24,6 +24,9 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version : '1.18'
+  
+      - name: Download dependencies
+        run: go mod download
       
       - name: Unit tests
         run: go test -v ./tests
