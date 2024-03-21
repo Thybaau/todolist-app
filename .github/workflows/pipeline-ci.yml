@@ -17,12 +17,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Cache Go dependencies
-        uses: actions/cache@v2
-        with:
-          path: server/go.sum  # Spécifiez le chemin vers le fichier go.sum dans le répertoire server
-          key: ${{ runner.os }}-go-${{ hashFiles('server/go.sum') }}  # Utilisez le chemin correct pour la clé de cache
-          restore-keys: |
             ${{ runner.os }}-go-
       
       - name: Set up Go
@@ -30,6 +24,12 @@ jobs:
         with:
           go-version : '1.18'
 
+      - name: Cache Go dependencies
+        uses: actions/cache@v2
+        with:
+          path: server/go.sum  # Spécifiez le chemin vers le fichier go.sum dans le répertoire server
+          key: ${{ runner.os }}-go-${{ hashFiles('server/go.sum') }}  # Utilisez le chemin correct pour la clé de cache
+          restore-keys: |
       # - name: Change directory to server
       #   run: cd server
   
