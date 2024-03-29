@@ -50,7 +50,7 @@ jobs:
 
       - name: Check database container
         run: |
-          docker compose ps -q todolist-db | grep -q .
+          docker compose ps -q database | grep -q .
           if [ $? -eq 0 ]; then
             echo "Database container is running"
           else
