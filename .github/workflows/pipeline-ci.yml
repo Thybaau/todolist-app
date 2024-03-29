@@ -25,17 +25,38 @@ jobs:
       - name: Unit tests
         working-directory: ./server/tests
         run: go test -v
-  
-      - name: Build
-        working-directory: ./server
-        run: go run main.go &
 
-  test_job_2:
-    name: Test Job 2
+  deploy:
+    name: Deploy locally
     runs-on: ubuntu-latest
     steps:
-      - name: Run echo command
-        run: echo "Running Test Job 2"
+      - name: Checkout repository
+        run: actions/checkout@v3
+
+      - name: Start app
+        run: |
+          docker compose up -d
+          sleep 10
+    
+      - name: Check if API is running
+        run: |
+          curl -sSf http://localhost:8080/
+          if [ $? -eq 0 ]; then
+            echo "API is running correctly"
+          else
+            echo "API is not running"
+            exit 1
+          fi
+
+      - name: Check database container
+        run: |
+          docker compose ps -q todolist-db | grep -q .
+          if [ $? -eq 0 ]; then
+            echo "Database container is running"
+          else
+            echo "Database container is not running"
+            exit 1
+          fi
 
   test_job_3:
     name: Test Job 3
@@ -43,17 +64,6 @@ jobs:
     steps:
       - name: Run echo command
         run: echo "Running Test Job 3"
-    # steps:
-    # - uses: actions/checkout@v3
-
-    # - name: Set up Go
-    #   uses: actions/setup-go@v4
-    #   with:
-    #     go-version: '1.20'
-
-    # - name: Build
-    #   run: go build -v ./...
-
     # - name: Test
     #   run: go test -v ./...
   
