@@ -23,8 +23,8 @@ jobs:
           go-version : '1.18'
       
       - name: Unit tests
-        working-directory: ./server/tests
-        run: go test -v
+        working-directory: ./server
+        run: go test -v ./...
 
   deploy:
     name: Deploy locally
@@ -36,20 +36,36 @@ jobs:
       - name: Start app
         run: |
           docker compose up -d
-          sleep 10
+          start_result=$?
+          if [start_result -ne 0]; then
+            echo "Error: Failed to start containers"
+            exit 1
+          fi
     
-      - name: Check if API is running
+      - name: Check API container
         run: |
+          api_logs=$(docker logs todolist-srv)
+          echo "$api_logs"
+          if ! echo "$api_logs" | grep -q "Running server on port 9000"; then
+            echo "Error : Problem while trying to start API container, check logs"
+            exit 1
+          fi
           curl -sSf http://localhost:8080/
           if [ $? -eq 0 ]; then
-            echo "API is running correctly"
+            echo "\n API is running correctly"
           else
-            echo "API is not running"
+            echo "\nCannot access API"
             exit 1
           fi
 
       - name: Check database container
         run: |
+          db_logs=$(docker logs todolist-db)
+          echo "$db_logs"
+          if ! echo "$db_logs" | grep -q "database system is ready to accept connections"; then
+            echo "Error : Problem while trying to start database container, check logs"
+            exit 1
+          fi
           docker compose ps -q database | grep -q .
           if [ $? -eq 0 ]; then
             echo "Database container is running"
@@ -57,6 +73,16 @@ jobs:
             echo "Database container is not running"
             exit 1
           fi
+
+      - name: Check client container
+        run: |
+          front_logs=$(docker logs todolist-front)
+          echo "$front_logs"
+          if ! echo "$front_logs" | grep -q "Local:" || ! echo "$front_logs" | grep -q "Network:"; then
+            echo "Error: todolist-front container did not start successfully"
+            exit 1 # Arrêter le workflow avec un code de sortie 1
+          fi
+          
 
   test_job_3:
     name: Test Job 3
