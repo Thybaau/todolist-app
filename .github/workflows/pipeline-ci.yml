@@ -46,9 +46,9 @@ jobs:
         working-directory: ./client
         run: npm run build
 
-      - name: Start Client
-        working-directory: ./client
-        run: npm run dev
+      # - name: Test Client
+      #   working-directory: ./client
+      #   run: npm run dev
 
   deploy:
     name: Deploy locally
