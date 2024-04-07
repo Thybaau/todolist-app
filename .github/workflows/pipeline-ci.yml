@@ -47,7 +47,7 @@ jobs:
           sleep 5
           api_logs=$(docker logs todolist-srv)
           echo "$api_logs"
-          if ! echo "$api_logs" | grep -q "Running server on port 9000"; then
+          if echo "$api_logs" | grep -q "Running server on port 9000"; then
             echo "Error : Problem while trying to start API container, check logs"
             exit 1
           fi
@@ -63,7 +63,7 @@ jobs:
         run: |
           db_logs=$(docker logs todolist-db)
           echo "$db_logs"
-          if ! echo "$db_logs" | grep -q "database system is ready to accept connections"; then
+          if echo "$db_logs" | grep -q "database system is ready to accept connections"; then
             echo "Error : Problem while trying to start database container, check logs"
             exit 1
           fi
@@ -79,7 +79,7 @@ jobs:
         run: |
           front_logs=$(docker logs todolist-front)
           echo "$front_logs"
-          if ! echo "$front_logs" | grep -q "Local:" || ! echo "$front_logs" | grep -q "Network:"; then
+          if echo "$front_logs" | grep -q "Local:" || ! echo "$front_logs" | grep -q "Network:"; then
             echo "Error: todolist-front container did not start successfully"
             exit 1 # Arrêter le workflow avec un code de sortie 1
           fi
