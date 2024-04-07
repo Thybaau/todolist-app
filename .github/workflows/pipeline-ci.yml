@@ -38,6 +38,18 @@ jobs:
         with:
           node-version: '21.6.1'
 
+      - name: Install Node dependencies
+        working-directory: ./client
+        run: npm install
+
+      - name: Build App
+        working-directory: ./client
+        run: npm run build
+
+      - name: Start Client
+        working-directory: ./client
+        run: npm run dev
+
   deploy:
     name: Deploy locally
     runs-on: ubuntu-latest
