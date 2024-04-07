@@ -44,6 +44,7 @@ jobs:
     
       - name: Check API container
         run: |
+          sleep 5
           api_logs=$(docker logs todolist-srv)
           echo "$api_logs"
           if ! echo "$api_logs" | grep -q "Running server on port 9000"; then
