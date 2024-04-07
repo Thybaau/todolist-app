@@ -25,6 +25,18 @@ jobs:
       - name: Unit tests
         working-directory: ./server
         run: go test -v ./...
+  
+  build_and_test_client:
+    name: Build and Test ReactJS Client
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+  
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '21.6.1'
 
   deploy:
     name: Deploy locally
@@ -88,9 +100,3 @@ jobs:
             exit 1
           fi         
 
-  build_and_test_client:
-    name: Build and Test ReactJS Client
-    runs-on: ubuntu-latest
-    steps:
-      - name: Run echo command
-        run: echo "Running Test Job 3"          
