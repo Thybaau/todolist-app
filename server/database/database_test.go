@@ -1,4 +1,4 @@
-package tests
+package database_test
 
 import (
 	"regexp"
