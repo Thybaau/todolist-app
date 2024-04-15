@@ -96,6 +96,9 @@ func (store *DBStore) GetTask(id int) (*Task, error) {
 func (store *DBStore) CreateTask(t *Task) (int64, error) {
 	var id int64
 	err := store.DB.QueryRow("INSERT INTO tasks (content,state) VALUES ($1, $2) RETURNING id", t.Content, t.State).Scan(&id)
+	if err != nil {
+		return 0, err
+	}
 	return id, err
 }
 
