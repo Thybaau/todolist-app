@@ -1,6 +1,7 @@
 package router
 
 import (
+	"bytes"
 	"net/http"
 	"net/http/httptest"
 	"regexp"
@@ -80,5 +81,116 @@ func TestHandleTaskDelete(t *testing.T) {
 	w := httptest.NewRecorder()
 	srv.handleTaskDelete()(w, req)
 
+	assert.Equal(t, http.StatusOK, w.Code)
+}
+
+func TestHandleTaskCreate(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("Error while creating mock : %s", err)
+	}
+	defer db.Close()
+
+	srv := &server{
+		DB: &database.DBStore{DB: db},
+	}
+
+	task := &database.Task{
+		ID:      0,
+		Content: "test task content",
+		State:   false,
+	}
+
+	insert := "INSERT INTO tasks (content,state) VALUES ($1, $2) RETURNING id"
+	mock.ExpectQuery(regexp.QuoteMeta(insert)).
+		WithArgs(task.Content, task.State).
+		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
+
+	requestBody := []byte(`{"content": "test task content"}`)
+	req := httptest.NewRequest("POST", "/tasks", bytes.NewBuffer(requestBody))
+	w := httptest.NewRecorder()
+	srv.handleTaskCreate()(w, req)
+
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatalf("Expectations were not met : %s", err)
+	}
+	assert.Equal(t, http.StatusOK, w.Code)
+
+}
+
+func TestHandleTaskEdit(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("Error while creating mock : %s", err)
+	}
+	defer db.Close()
+
+	srv := &server{
+		DB: &database.DBStore{DB: db},
+	}
+
+	taskID := "12"
+	content := "test task content"
+
+	query := "SELECT EXISTS (SELECT 1 FROM tasks WHERE id = $1)"
+	mock.ExpectQuery(regexp.QuoteMeta(query)).WithArgs(12).
+		WillReturnRows(sqlmock.NewRows([]string{"exists"}).AddRow(true))
+
+	mock.ExpectExec("UPDATE tasks SET content = \\$1 WHERE id = \\$2").
+		WithArgs(content, 12).
+		WillReturnResult(sqlmock.NewResult(0, 1))
+
+	rows := sqlmock.NewRows([]string{"id", "content", "state"}).
+		AddRow(12, content, false)
+
+	query = "SELECT id, content, state FROM tasks WHERE id = $1"
+	mock.ExpectQuery(regexp.QuoteMeta(query)).WithArgs(12).WillReturnRows(rows)
+
+	requestBody := []byte(`{"content": "test task content"}`)
+	req := httptest.NewRequest("PUT", "/tasks/"+taskID, bytes.NewBuffer(requestBody))
+	req = mux.SetURLVars(req, map[string]string{"id": taskID})
+	w := httptest.NewRecorder()
+	srv.handleTaskEdit()(w, req)
+
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatalf("Expectations were not met : %s", err)
+	}
+	assert.Equal(t, http.StatusOK, w.Code)
+}
+
+func TestHandleChangeTaskState(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Errorf("Error while creating mock : %s", err)
+	}
+	defer db.Close()
+	srv := &server{
+		DB: &database.DBStore{DB: db},
+	}
+
+	taskID := 12
+	state := true
+
+	query := "SELECT id, content, state FROM tasks WHERE id = \\$1"
+	rows1 := sqlmock.NewRows([]string{"id", "content", "state"}).
+		AddRow(taskID, "Task 1", !state)
+	mock.ExpectQuery(query).WithArgs(taskID).WillReturnRows(rows1)
+
+	mock.ExpectExec("UPDATE tasks SET state = \\$1 WHERE id = \\$2").
+		WithArgs(state, taskID).
+		WillReturnResult(sqlmock.NewResult(0, 1))
+
+	rows2 := sqlmock.NewRows([]string{"id", "content", "state"}).
+		AddRow(taskID, "Task 1", state)
+	mock.ExpectQuery(query).WithArgs(taskID).WillReturnRows(rows2)
+
+	req := httptest.NewRequest("PUT", "/tasks/state/12", nil)
+	req = mux.SetURLVars(req, map[string]string{"id": "12"})
+	w := httptest.NewRecorder()
+	srv.handleTaskState()(w, req)
+
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatalf("Expectations were not met : %s", err)
+	}
 	assert.Equal(t, http.StatusOK, w.Code)
 }
