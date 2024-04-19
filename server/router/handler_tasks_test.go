@@ -2,6 +2,7 @@ package router
 
 import (
 	"bytes"
+	"database/sql"
 	"net/http"
 	"net/http/httptest"
 	"regexp"
@@ -81,6 +82,56 @@ func TestHandleTaskListOneTask(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 }
 
+func TestHandleTaskListIDNotFound(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("Error while creating mock : %s", err)
+	}
+	defer db.Close()
+
+	query := "SELECT id, content, state FROM tasks WHERE id = $1"
+	mock.ExpectQuery(regexp.QuoteMeta(query)).WithArgs(2).WillReturnError(sql.ErrNoRows)
+	srv := &server{
+		DB: &database.DBStore{DB: db},
+	}
+	req := httptest.NewRequest("GET", "/tasks?id=2", nil)
+	w := httptest.NewRecorder()
+	srv.handleTaskList()(w, req)
+
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatalf("Expectations were not met : %s", err)
+	}
+
+	expectedResp := `{
+		"error": "Task id=2 not found",
+		"detail": "sql: no rows in result set"
+	  }`
+	assert.JSONEq(t, expectedResp, w.Body.String())
+	assert.Equal(t, http.StatusNotFound, w.Code)
+}
+
+func TestHandleTaskListQueryNotFound(t *testing.T) {
+	db, _, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("Error while creating mock : %s", err)
+	}
+	defer db.Close()
+
+	srv := &server{
+		DB: &database.DBStore{DB: db},
+	}
+	req := httptest.NewRequest("GET", "/tasks?id=", nil)
+	w := httptest.NewRecorder()
+	srv.handleTaskList()(w, req)
+
+	expectedResp := `{
+		"error": "Query parameter 'id' not found",
+		"detail": ""
+	  }`
+	assert.JSONEq(t, expectedResp, w.Body.String())
+	assert.Equal(t, http.StatusNotFound, w.Code)
+}
+
 // Delete Task
 
 func TestHandleTaskDelete(t *testing.T) {
@@ -103,9 +154,45 @@ func TestHandleTaskDelete(t *testing.T) {
 	w := httptest.NewRecorder()
 	srv.handleTaskDelete()(w, req)
 
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatalf("Expectations were not met : %s", err)
+	}
+
 	expectedResp := `{"message": "successfully deleted task with id=12"}`
 	assert.JSONEq(t, expectedResp, w.Body.String())
 	assert.Equal(t, http.StatusOK, w.Code)
+}
+
+func TestHandleTaskDeleteIDNotFound(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("Error while creating mock : %s", err)
+	}
+	defer db.Close()
+
+	srv := &server{
+		DB: &database.DBStore{DB: db},
+	}
+
+	taskID := "12"
+	delete := "DELETE FROM tasks WHERE id = \\$1"
+	mock.ExpectExec(delete).WithArgs(12).WillReturnResult(sqlmock.NewResult(0, 0))
+
+	req := httptest.NewRequest("DELETE", "/tasks/"+taskID, nil)
+	req = mux.SetURLVars(req, map[string]string{"id": taskID})
+	w := httptest.NewRecorder()
+	srv.handleTaskDelete()(w, req)
+
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatalf("Expectations were not met : %s", err)
+	}
+
+	expectedResp := `{
+		"error": "Cannot delete task",
+		"detail": "task with ID 12 does not exist"
+	  }`
+	assert.JSONEq(t, expectedResp, w.Body.String())
+	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
 
 // Create task
@@ -147,6 +234,56 @@ func TestHandleTaskCreate(t *testing.T) {
 	  }`
 	assert.JSONEq(t, expectedResp, w.Body.String())
 	assert.Equal(t, http.StatusOK, w.Code)
+
+}
+
+func TestHandleTaskCreateContentEmpty(t *testing.T) {
+	db, _, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("Error while creating mock : %s", err)
+	}
+	defer db.Close()
+
+	srv := &server{
+		DB: &database.DBStore{DB: db},
+	}
+
+	requestBody := []byte(`{"content": ""}`)
+	req := httptest.NewRequest("POST", "/tasks", bytes.NewBuffer(requestBody))
+	w := httptest.NewRecorder()
+	srv.handleTaskCreate()(w, req)
+
+	expectedResp := `{
+		"error": "Key 'content' cannot be empty",
+		"detail": ""
+	  }`
+	assert.JSONEq(t, expectedResp, w.Body.String())
+	assert.Equal(t, http.StatusForbidden, w.Code)
+
+}
+
+func TestHandleTaskCreateBadContentInt(t *testing.T) {
+	db, _, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("Error while creating mock : %s", err)
+	}
+	defer db.Close()
+
+	srv := &server{
+		DB: &database.DBStore{DB: db},
+	}
+
+	requestBody := []byte(`{"content": 43}`)
+	req := httptest.NewRequest("POST", "/tasks", bytes.NewBuffer(requestBody))
+	w := httptest.NewRecorder()
+	srv.handleTaskCreate()(w, req)
+
+	expectedResp := `{
+		"error": "Cannot decode task body from json",
+		"detail": "json: cannot unmarshal number into Go struct field request.content of type string"
+	  }`
+	assert.JSONEq(t, expectedResp, w.Body.String())
+	assert.Equal(t, http.StatusBadRequest, w.Code)
 
 }
 
@@ -198,6 +335,60 @@ func TestHandleTaskEdit(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 }
 
+func TestHandleTaskEditBodyWrongType(t *testing.T) {
+	db, _, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("Error while creating mock : %s", err)
+	}
+	defer db.Close()
+
+	srv := &server{
+		DB: &database.DBStore{DB: db},
+	}
+
+	taskID := "12"
+
+	requestBody := []byte(`{"content": 40}`)
+	req := httptest.NewRequest("PUT", "/tasks/"+taskID, bytes.NewBuffer(requestBody))
+	req = mux.SetURLVars(req, map[string]string{"id": taskID})
+	w := httptest.NewRecorder()
+	srv.handleTaskEdit()(w, req)
+
+	expectedResp := `{
+		"error": "Cannot parse task body",
+		"detail": "json: cannot unmarshal number into Go struct field request.content of type string"
+	  }`
+	assert.JSONEq(t, expectedResp, w.Body.String())
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
+func TestHandleTaskEditContentEmpty(t *testing.T) {
+	db, _, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("Error while creating mock : %s", err)
+	}
+	defer db.Close()
+
+	srv := &server{
+		DB: &database.DBStore{DB: db},
+	}
+
+	taskID := "12"
+
+	requestBody := []byte(`{"content": ""}`)
+	req := httptest.NewRequest("PUT", "/tasks/"+taskID, bytes.NewBuffer(requestBody))
+	req = mux.SetURLVars(req, map[string]string{"id": taskID})
+	w := httptest.NewRecorder()
+	srv.handleTaskEdit()(w, req)
+
+	expectedResp := `{
+		"error": "Key 'content' cannot be empty",
+		"detail": ""
+	  }`
+	assert.JSONEq(t, expectedResp, w.Body.String())
+	assert.Equal(t, http.StatusForbidden, w.Code)
+}
+
 // Change task state
 
 func TestHandleChangeTaskState(t *testing.T) {
@@ -241,4 +432,35 @@ func TestHandleChangeTaskState(t *testing.T) {
 	  }`
 	assert.JSONEq(t, expectedResp, w.Body.String())
 	assert.Equal(t, http.StatusOK, w.Code)
+}
+
+func TestHandleChangeTaskStateBadID(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Errorf("Error while creating mock : %s", err)
+	}
+	defer db.Close()
+	srv := &server{
+		DB: &database.DBStore{DB: db},
+	}
+
+	taskID := 12
+
+	query := "SELECT id, content, state FROM tasks WHERE id = \\$1"
+	mock.ExpectQuery(query).WithArgs(taskID).WillReturnError(sql.ErrNoRows)
+
+	req := httptest.NewRequest("PUT", "/tasks/state/12", nil)
+	req = mux.SetURLVars(req, map[string]string{"id": "12"})
+	w := httptest.NewRecorder()
+	srv.handleTaskState()(w, req)
+
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatalf("Expectations were not met : %s", err)
+	}
+	expectedResp := `{
+		"error": "Task not found",
+		"detail": "sql: no rows in result set"
+	  }`
+	assert.JSONEq(t, expectedResp, w.Body.String())
+	assert.Equal(t, http.StatusNotFound, w.Code)
 }
