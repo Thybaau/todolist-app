@@ -20,14 +20,12 @@ services:
     depends_on:
       - database
 
-  client:
+  nginx:
     build:
       dockerfile: client/Dockerfile
-    image : todolist-client
-    container_name: todolist-front
-    restart: on-failure
+    container_name: todolist-nginx
     ports:
-      - "3000:5173"
+      - "80:80"
     depends_on:
       - server
 
