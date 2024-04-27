@@ -75,7 +75,7 @@ jobs:
             echo "Error : Problem while trying to start API container, check logs"
             exit 1
           fi
-          curl -sSf http://localhost:8080/
+          curl -sSf http://localhost:80/
           if [ $? -eq 0 ]; then
             echo "\n API is running correctly"
           else
