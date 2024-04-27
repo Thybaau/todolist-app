@@ -103,7 +103,7 @@ jobs:
 
       - name: Check NginX container
         run: |
-          front_logs=$(docker logs todolist-app-nginx)
+          front_logs=$(docker logs todolist-nginx)
           echo "$front_logs"
           if echo "$front_logs" | grep -q "Local:" || echo "$front_logs" | grep -q "Configuration complete; ready for start up"; then
             echo "NginX container started successfully"
