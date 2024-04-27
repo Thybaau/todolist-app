@@ -15,8 +15,6 @@ services:
     image: todolist-server
     container_name: todolist-srv
     restart: on-failure
-    ports:
-      - 8080:9000
     depends_on:
       - database
 
