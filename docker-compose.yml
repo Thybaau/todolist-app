@@ -8,8 +8,6 @@ services:
     restart: always
     volumes:
       - todolist_db:/var/lib/postgresql/data
-    ports:
-      - 5432:5432
 
   server:
     build:
@@ -17,19 +15,15 @@ services:
     image: todolist-server
     container_name: todolist-srv
     restart: on-failure
-    ports:
-      - 8080:9000
     depends_on:
       - database
 
-  client:
+  nginx:
     build:
       dockerfile: client/Dockerfile
-    image : todolist-client
-    container_name: todolist-front
-    restart: on-failure
+    container_name: todolist-nginx
     ports:
-      - "3000:5173"
+      - "80:80"
     depends_on:
       - server
 

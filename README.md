@@ -1,6 +1,7 @@
 # Todolist App
 
 ![Go version](https://img.shields.io/badge/Go-1.18-blue)
+![Node version](https://img.shields.io/badge/Node-21.6.1-green)
 
 <!-- TABLE OF CONTENTS -->
 <details>
@@ -29,13 +30,20 @@
 ![Product Name Screen Shot](imgs/todolist_image.png)
 
 Simple To-do list app, to order your tasks.
-Using PostgreSQL as database, Golang for back-end part, and ReactJS/Javascript for front-end. Each services are containerized with Docker and run with Docker Compose.
+Using PostgreSQL as database, Golang for back-end part, and ReactJS/Javascript for front-end. Using also NginX as web and static file server, and as reverse proxy. Each services are containerized with Docker and run with Docker Compose.
 
 ### Built with
 
+#### Server :
 * [![Golang][Go]][Go-url]
+* [![Nginx][Nginx]][Nginx-url]
+#### Client:
 * [![React][React.js]][React-url]
+* [![Vite][Vite]][Vite-url]
+* [![Tailwind CSS][Tailwind]][Tailwind-url]
+#### Database :
 * [![Postgre][Postgre]][Postgre-url]
+#### Containerization :
 * [![Docker][Docker]][Docker-url]
 
 ### Functionalities
@@ -74,9 +82,11 @@ In project root, do the following command :
 docker compose up -d
 ```
 
-App should now correctly running. Remove the `-d` if you want to see the logs in your terminal.
+Remove the `-d` if you want to see the logs in your terminal. App should now correctly running.
 
-The project is composed of three services : `database`, `server` and `client`. If you want to see the logs in realtime of a specifical service, write this command and replace `<service_name>` with one of the three services names :
+Connect to Nginx server by using `localhost` or `localhost:80` address.
+
+The project is composed of three services : `database`, `server` and `nginx`. If you want to see the logs of a specifical service in realtime, write this command and replace `<service_name>` with one of the three services names :
 
 ```shell
 docker compose logs -f <service_name>
@@ -85,7 +95,7 @@ docker compose logs -f <service_name>
 If you want to enter in one of the containers :
 
 ```shell
-docker compose exec <service_name> sh
+docker compose exec -it <service_name> sh
 ```
 
 <!-- MARKDOWN LINKS & IMAGES -->
@@ -102,8 +112,17 @@ docker compose exec <service_name> sh
 [React.js]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
 [React-url]: https://reactjs.org/
 
+[Vite]: https://img.shields.io/badge/Vite-B73BFE?style=for-the-badge&logo=vite&logoColor=FFD62E
+[Vite-url]: https://vitejs.dev/
+
+[Tailwind]: https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white
+[Tailwind-url]: https://tailwindcss.com/
+
 [Docker]: https://img.shields.io/badge/Docker-2CA5E0?style=for-the-badge&logo=docker&logoColor=white
 [Docker-url]: https://www.docker.com/
+
+[Nginx]: https://img.shields.io/badge/Nginx-009639?style=for-the-badge&logo=nginx&logoColor=white
+[Nginx-url]: https://www.nginx.com/
 
 [Postgre]: https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white
 [Postgre-url]: https://www.postgresql.org/

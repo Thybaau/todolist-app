@@ -12,7 +12,7 @@ function App() {
       return;
     }
     try {
-      const response = await fetch('http://localhost:8080/tasks', {
+      const response = await fetch('http://localhost/tasks', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
