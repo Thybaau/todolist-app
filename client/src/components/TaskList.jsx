@@ -9,7 +9,7 @@ export default function TaskList({tasks, setTasks}) {
     const [editedContent, setEditedContent] = useState('');
 
     useEffect(() => {
-        fetch('http://localhost:8080/tasks', {
+        fetch('http://localhost/tasks', {
             method: 'GET'
         })
             .then(response => response.json())
@@ -20,7 +20,7 @@ export default function TaskList({tasks, setTasks}) {
     const sortedTasks = [...tasks].sort((a, b) => a.id - b.id);
 
     function deleteTask(id){
-        fetch(`http://localhost:8080/tasks/${id}`, {
+        fetch(`http://localhost/tasks/${id}`, {
             method: 'DELETE'
         })
         .then(response => {
@@ -43,7 +43,7 @@ export default function TaskList({tasks, setTasks}) {
 
     async function saveEditTask(id) {
         try {
-            const response = await fetch(`http://localhost:8080/tasks/${id}`, {
+            const response = await fetch(`http://localhost/tasks/${id}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -51,7 +51,7 @@ export default function TaskList({tasks, setTasks}) {
             body: JSON.stringify({ content: editedContent })
             });
             if (response.ok) {
-                fetch('http://localhost:8080/tasks', {
+                fetch('http://localhost/tasks', {
                     method: 'GET'
                 })
                     .then(response => response.json())
@@ -81,13 +81,13 @@ export default function TaskList({tasks, setTasks}) {
 
     async function changeTaskState(task) {
         try {
-            const response = await fetch(`http://localhost:8080/tasks/state/${task.id}`, {
+            const response = await fetch(`http://localhost/tasks/state/${task.id}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
             },})
             if (response.ok) {
-                fetch('http://localhost:8080/tasks', {
+                fetch('http://localhost/tasks', {
                     method: 'GET'
                 })
                     .then(response => response.json())

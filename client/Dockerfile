@@ -1,15 +1,14 @@
-FROM node:21.6.1
+FROM node:21.6.1 AS builder
 
 WORKDIR /usr/src/app
-
-COPY ./client/package.json ./
-COPY ./client/package-lock.json .
-
-RUN npm install
-
 COPY ./client .
-
+WORKDIR /usr/src/app/client
+RUN npm install
 RUN npm run build
 
-EXPOSE 3000
-CMD [ "npm", "run", "dev" ]
+FROM nginx
+RUN rm /etc/nginx/conf.d/default.conf
+COPY --from=builder /usr/src/app/dist /usr/share/nginx/html
+COPY ./nginx.conf /etc/nginx/nginx.conf
+
+EXPOSE 80

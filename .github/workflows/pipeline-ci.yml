@@ -16,23 +16,23 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-      
+
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
           go-version : '1.18'
-      
+
       - name: Unit tests
         working-directory: ./server
         run: go test -v ./...
-  
+
   build_and_test_client:
     name: Build and Test ReactJS Client
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-  
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -65,7 +65,7 @@ jobs:
             echo "Error: Failed to start containers"
             exit 1
           fi
-    
+
       - name: Check API container
         run: |
           sleep 5
@@ -75,7 +75,7 @@ jobs:
             echo "Error : Problem while trying to start API container, check logs"
             exit 1
           fi
-          curl -sSf http://localhost:8080/
+          curl -sSf http://localhost:80/
           if [ $? -eq 0 ]; then
             echo "\n API is running correctly"
           else
@@ -101,14 +101,14 @@ jobs:
             exit 1
           fi
 
-      - name: Check client container
+      - name: Check NginX container
         run: |
-          front_logs=$(docker logs todolist-front)
+          front_logs=$(docker logs todolist-nginx)
           echo "$front_logs"
-          if echo "$front_logs" | grep -q "Local:" || echo "$front_logs" | grep -q "Network:"; then
-            echo "Client container started successfully"
+          if echo "$front_logs" | grep -q "Local:" || echo "$front_logs" | grep -q "Configuration complete; ready for start up"; then
+            echo "NginX container started successfully"
           else
-            echo "Error: Problem while trying to start client container, check logs"
+            echo "Error: Problem while trying to start NginX container, check logs"
             exit 1
-          fi         
+          fi
 
