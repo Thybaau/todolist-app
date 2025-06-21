@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -45,14 +46,21 @@ func VerifyToken(tokenString string) (jwt.MapClaims, error) {
 
 func JWTMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Récupérer le jeton JWT depuis l'en-tête Authorization
+		// Get JWT from header
 		tokenString := r.Header.Get("Authorization")
 		if tokenString == "" {
 			NewHTTPError(w, "Missing authorization token", http.StatusUnauthorized, nil)
 			return
 		}
 
-		claims, err := VerifyToken(tokenString)
+		// Check that token is prefixed by "Bearer "
+		tokenSplitted := strings.Split(tokenString, " ")
+		if len(tokenSplitted) != 2 || tokenSplitted[0] != "Bearer" {
+			NewHTTPError(w, "Invalid authentication token, no prefix Bearer", http.StatusUnauthorized, nil)
+			return
+		}
+
+		claims, err := VerifyToken(tokenSplitted[1])
 		if err != nil {
 			NewHTTPError(w, "Invalid authentication token", http.StatusUnauthorized, err)
 			return

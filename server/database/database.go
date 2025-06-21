@@ -17,17 +17,23 @@ type Database interface {
 	DeleteTask(taskID int) error
 	EditTask(taskID int, content string) error
 	ChangeTaskState(taskID int) (*Task, error)
+	CreateUser(username string, password []byte) (int64, error)
+	GetUserInfos(username string) (*User, error)
 }
 
 type DBStore struct {
 	DB *sql.DB
 }
-
-// Tasks structs
 type Task struct {
-	ID      int64  `db:"id"`
-	Content string `db:"content"`
-	State   bool   `db:"state"`
+	ID       int64  `db:"id"`
+	Content  string `db:"content"`
+	State    bool   `db:"state"`
+	Username string `db:"username"`
+}
+type User struct {
+	ID             int64  `db:"id"`
+	Username       string `db:"username"`
+	HashedPassword []byte `db:"password"`
 }
 
 type CustomError struct {
@@ -95,7 +101,7 @@ func (store *DBStore) GetTask(id int) (*Task, error) {
 
 func (store *DBStore) CreateTask(t *Task) (int64, error) {
 	var id int64
-	err := store.DB.QueryRow("INSERT INTO tasks (content,state) VALUES ($1, $2) RETURNING id", t.Content, t.State).Scan(&id)
+	err := store.DB.QueryRow("INSERT INTO tasks (content,state,username) VALUES ($1, $2, $3) RETURNING id", t.Content, t.State, t.Username).Scan(&id)
 	if err != nil {
 		return 0, err
 	}
@@ -151,4 +157,22 @@ func (store *DBStore) ChangeTaskState(taskID int) (*Task, error) {
 	}
 	task, err = store.GetTask(taskID)
 	return task, err
+}
+
+func (store *DBStore) CreateUser(username string, password []byte) (int64, error) {
+	var id int64
+	err := store.DB.QueryRow("INSERT INTO users (username,password) VALUES ($1, $2) RETURNING id", username, password).Scan(&id)
+	if err != nil {
+		return 0, err
+	}
+	return id, err
+}
+
+func (store *DBStore) GetUserInfos(username string) (*User, error) {
+	row := store.DB.QueryRow("SELECT id, username, password FROM users WHERE username = $1", username)
+	var user User
+	if err := row.Scan(&user.ID, &user.Username, &user.HashedPassword); err != nil {
+		return nil, err
+	}
+	return &user, nil
 }

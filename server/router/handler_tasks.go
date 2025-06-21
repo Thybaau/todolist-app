@@ -13,9 +13,10 @@ import (
 )
 
 type jsonTask struct {
-	ID      int64  `json:"id"`
-	Content string `json:"content"`
-	State   bool   `json:"state"`
+	ID       int64  `json:"id"`
+	Content  string `json:"content"`
+	State    bool   `json:"state"`
+	Username string `json:"username"`
 }
 
 func (s *server) handleTaskCreate() http.HandlerFunc {
@@ -23,6 +24,14 @@ func (s *server) handleTaskCreate() http.HandlerFunc {
 		Content string `json:"content"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
+		// Extract username from request context
+		usernameRaw := r.Context().Value("username")
+		if usernameRaw == nil {
+			middleware.NewHTTPError(w, "Username not found in context request", http.StatusUnauthorized, nil)
+			return
+		}
+		username := usernameRaw.(string)
+
 		//Decode and check fields in request
 		req := request{}
 		err := json.NewDecoder(r.Body).Decode(&req)
@@ -37,9 +46,10 @@ func (s *server) handleTaskCreate() http.HandlerFunc {
 
 		// Insert task in database
 		t := &database.Task{
-			ID:      0, //Useless because we will not use this element
-			Content: req.Content,
-			State:   false,
+			ID:       0, //Useless because we will not use this element
+			Content:  req.Content,
+			State:    false,
+			Username: username,
 		}
 		id, err := s.DB.CreateTask(t)
 		if err != nil {
@@ -49,9 +59,10 @@ func (s *server) handleTaskCreate() http.HandlerFunc {
 
 		// Write response
 		var resp = jsonTask{
-			ID:      id,
-			Content: t.Content,
-			State:   t.State,
+			ID:       id,
+			Content:  t.Content,
+			State:    t.State,
+			Username: t.Username,
 		}
 		middleware.JSONResponse(w, http.StatusOK, resp)
 	}
